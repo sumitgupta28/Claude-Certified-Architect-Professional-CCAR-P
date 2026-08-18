@@ -1,0 +1,119 @@
+### 1. Summary
+
+The [Claude Platform & Solution Design](https://anthropic-partners.skilljar.com/path/claude-certified-architect-professional/claude-platform-solution-design/486647/scorm/2gvs1pi0tq0sq) module establishes the foundational architectural decisions required when translating unstructured business requests into enterprise-grade system architectures:
+
+* **Decomposition & Responsibility Allocation:** System capabilities must be systematically assigned across Claude, existing deterministic systems, and human-in-the-loop controls using the **four properties of generative AI** as a decision lens. Over-assigning deterministic logic to Claude is identified as the most common early architectural failure.
+* **Execution Pattern Selection:** Architects must evaluate system shapes across a spectrum—**augmented calls**, structured **workflows**, and autonomous **agents**—by balancing operational flexibility against non-determinism, latency, and **fan-out drop**.
+* **State vs. Retrieval Separation:** Blueprint selection requires distinguishing static context from live operational data, preventing antipatterns where vector **retrieval** attempts to manage **live transactional state**.
+* **Governance, Entry Points, & Stage-Gates:** System delivery routes (**Claude.ai**, API/SDKs, **Claude Code**, or **MCP servers**) must be filtered by enterprise governance and regulated-industry constraints before cost or latency trade-offs are evaluated. Model tier swaps (e.g., Sonnet to Haiku) require empirical validation through **evaluation stage-gates**.
+
+---
+
+### 2. Clear & Simple Explanation
+
+* **Decomposition (Who Does What?):** Do not force Claude to do work that traditional databases or code handle perfectly. Assign deterministic tasks (like calculations or exact database lookups) to existing software, non-deterministic reasoning tasks to Claude, and high-risk decisions to human reviewers.
+* **Pattern Selection (Execution Structure):** An *augmented call* is a simple input-output request. A *workflow* follows strict, step-by-step code paths with Claude handling specific nodes. An *agent* decides its own steps and tool usage dynamically. More autonomy brings higher flexibility, but also increases non-determinism and failure points.
+* **State vs. Retrieval (Data Ownership):** Vector databases and RAG pipelines are meant for searching historical knowledge bases. They should never be used to keep track of real-time account balances or live inventory—that job belongs strictly to transactional databases.
+* **Governance & Stage-Gates (Deployment Rules):** Security and regulatory rules must instantly rule out non-compliant deployment paths before you look at price or performance. Furthermore, never switch model tiers in production to save money without running automated test evaluations first to prove accuracy will not drop.
+
+---
+
+### 3. Preserve Technical Accuracy
+
+Architectural decisions require precise technical differentiation across platform primitives and delivery routes:
+
+* **Four Properties of Generative AI Lens:** Used during decomposition to audit capabilities, preventing deterministic drift where non-deterministic LLM calls replace proven algorithmic logic.
+* **Pattern Spectrum & Fan-Out Drop:** Progression from single-completion calls to orchestrated multi-agent topologies, where architects must explicitly calculate and mitigate cumulative failure rates across parallel agent executions (fan-out drop).
+* **Live Transactional State vs. Vector Retrieval:** Operational mandate ensuring ACID-compliant relational or key-value stores handle real-time transactional data, reserving RAG vector stores exclusively for unstructured context retrieval.
+* **Model Context Protocol (MCP) Server Integration:** Standardized client-server protocol defining secure tool interfaces and context boundary delivery to Claude endpoints.
+* **Evaluation Stage-Gate:** Mandatory benchmark evaluation suites executed prior to model tier downgrades, prompt restructuring, or context strategy alterations in production environments.
+
+---
+
+### 4. Real-World Application
+
+An enterprise health insurance provider is designing an automated patient pre-authorization system:
+
+* **Decomposition:** Patient eligibility and policy verification are routed to legacy core databases (**live transactional state**). Claude parses unstructured clinical notes submitted by physicians to identify requested medical procedures. Complex or ambiguous medical cases are routed to a nurse reviewer (**human-in-the-loop**).
+* **Pattern & Architecture:** The team selects a structured **workflow pattern** over an autonomous agent to guarantee deterministic execution paths required for healthcare compliance audits.
+* **Entry Point & Governance:** The solution connects through an **MCP server** integrated into private microservices via API SDKs over dedicated enterprise VPC endpoints. Direct web entry points (`Claude.ai`) and developer build interfaces (`Claude Code`) are explicitly ruled out upfront due to HIPAA data residency constraints.
+* **Model & Evaluation Strategy:** The system initially uses Claude 3.5 Sonnet for clinical reasoning. To lower operating costs, the team evaluates migrating initial request classification to Claude 3.5 Haiku. Before deploying, the architecture passes through an **evaluation stage-gate** across 2,000 historical patient charts, confirming zero accuracy loss in procedure extraction before approval.
+
+---
+
+### 5. Exam Practice
+
+**Question 1**
+
+An architect is designing a core banking assistant using Claude. The engineering team proposes storing real-time checking account balances in a vector database so Claude can access them via RAG during customer support chats. How should the architect evaluate this proposal against CCAR-P reference architecture principles?
+
+A) Approve the design, because vector databases offer lower query latency for conversational pipelines.
+
+B) Reject the design, because retrieval mechanisms must not manage live transactional state; real-time balance queries must be executed via deterministic API tool calls against relational systems.
+
+C) Modify the design by replacing RAG with an autonomous multi-agent pattern that polls the vector store.
+
+D) Approve the design, provided that context pre-caching is enabled across all customer sessions.
+
+**Question 2**
+
+During an architectural review for a regulated insurance system, a team proposes using a fully autonomous multi-agent framework with dynamic execution paths to process claims. What primary risk and governance rule must the architect apply?
+
+A) Multi-agent systems exceed API request limits and must be converted to single-turn completions.
+
+B) Autonomous patterns increase non-determinism and fan-out failure risks, and enterprise governance/compliance constraints must rule out unconstrained dynamic routes before cost or performance trade-offs are considered.
+
+C) MCP servers are incompatible with workflow orchestration engines in production settings.
+
+D) System prompts cannot be reused when deploying agentic tool patterns.
+
+**Question 3**
+
+To reduce monthly operational expenditure, an engineering lead proposes swapping Claude 3.5 Sonnet with Claude 3.5 Haiku across all internal enterprise routing services. According to the CCAR-P solution design framework, what mandatory stage-gate must occur prior to production deployment?
+
+A) Reconfigure the application to use web-based entry points instead of SDK integrations.
+
+B) Execute an automated evaluation suite against a representative benchmark dataset to verify accuracy and ensure no performance regressions occur.
+
+C) Expand the context window length on all Haiku API payloads to compensate for parameter differences.
+
+D) Deploy a dedicated MCP server to compress incoming prompt tokens.
+
+**Question 4**
+
+An enterprise architect is selecting delivery routes for a patient triage application. Regulatory policy dictates strict HIPAA compliance, data isolation, and comprehensive audit logging. Which decision sequence correctly aligns with CCAR-P platform design guidelines?
+
+A) Select the cheapest model tier first, then apply compliance filters during integration testing.
+
+B) Identify enterprise governance and regulatory constraints to eliminate non-compliant entry points and delivery routes before evaluating cost, latency, or model tier trade-offs.
+
+C) Deploy via Claude Code end-user interfaces to bypass middleware proxy requirements.
+
+D) Default to Claude.ai enterprise accounts, as build-time SDKs cannot be audited by security teams.
+
+---
+
+#### Answer & Explanation Key
+
+* **Question 1 Correct Answer:** **B**
+*Explanation:* A primary architectural watch-out is ensuring retrieval/RAG does not manage live transactional state. Dynamic, real-time data like account balances must reside in deterministic database systems and be accessed via tool calls, not retrieved from static or lagging vector indices.
+* **Question 2 Correct Answer:** **B**
+*Explanation:* Unconstrained agentic patterns introduce non-determinism and fan-out risks. Furthermore, in high-stakes regulated environments, governance and compliance rules must eliminate non-compliant execution routes before cost or latency optimizations are evaluated.
+* **Question 3 Correct Answer:** **B**
+*Explanation:* The CCAR-P framework requires that empirical evaluation stage-gates (benchmarking against test datasets) must be passed before any model swap or context strategy change is approved for production.
+* **Question 4 Correct Answer:** **B**
+*Explanation:* Governance and regulatory constraints act as hard filters that must be applied first to rule out ineligible entry points or delivery routes prior to balancing cost, speed, or model selection trade-offs.
+
+---
+
+### Key Technical Terms
+
+* **Decomposition:** The systematic partitioning of application requirements between Claude, deterministic legacy software, and human oversight based on capability fit.
+* **Augmented Call:** A single-turn API completion where Claude transforms, classifies, or summarizes input using fixed context.
+* **Workflow:** A structured execution pattern with hardcoded programmatic routing logic connecting discrete processing steps.
+* **Agent:** An autonomous execution pattern where Claude dynamically determines task planning, tool selection, and multi-step execution.
+* **Fan-Out Drop:** The cumulative drop in overall system reliability that occurs when multiple non-deterministic agent steps run in parallel or sequence.
+* **Live Transactional State:** Real-time operational data requiring strict ACID compliance, managed by traditional database systems rather than vector search corpora.
+* **Model Context Protocol (MCP) Server:** An open protocol enabling standardized, secure client-server integrations between Claude and external data sources or tools.
+* **Evaluation Stage-Gate:** An automated testing workflow using standardized benchmark datasets to validate accuracy before deploying model or prompt changes.
+* **Deterministic Drift:** The architectural failure caused by replacing reliable, rule-based algorithmic code with non-deterministic LLM completions.
