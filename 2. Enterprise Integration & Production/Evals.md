@@ -10,6 +10,7 @@ Evaluating Claude applications requires shifting evaluation design left to estab
   * *Model-Based Judge Scoring*: Uses secondary model judges to evaluate subjective outputs like reasoning accuracy and tone.
   * *Interpretation & Failure Mode Analysis*: Tracks aggregate pass rates while evaluating specific failure categories to prevent mean score masking of edge-case regressions.
 
+<img width="1376" height="768" alt="shift_left_evaluation_strategy_flow" src="https://github.com/user-attachments/assets/ed6c20eb-f034-4300-aa86-d7ea11228e30" />
 
 * **Grading Ladder Optimization**: Teams must use the lowest-cost, fastest tier capable of verifying a behavior—starting with code-based checks, escalating to calibrated model judges, and reserving human annotation for high-risk or novel edge cases.
 * **Multi-Turn & Continuous Gating**: Multi-turn evaluations require complete conversation transcripts to verify context preservation and prevent hallucination over long exchanges. Out-of-date eval suites create false deployment confidence during prompt engineering or model swaps. Hands-on grading patterns can be explored via the [Claude Cookbooks](https://www.google.com/search?q=https://github.com/anthropics/claude-cookbooks/blob/main/misc/building_evals.ipynb).
